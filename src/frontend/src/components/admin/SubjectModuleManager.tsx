@@ -48,6 +48,8 @@ function statusStyle(status: Module["status"]) {
       return "bg-yellow-100 text-yellow-800 border-yellow-400";
     case "Archived":
       return "bg-zinc-200 text-zinc-600 border-zinc-400";
+    default:
+      return "bg-zinc-100 text-zinc-600 border-zinc-400";
   }
 }
 
@@ -66,11 +68,17 @@ function SubjectModal({
   const [name, setName] = useState(initial?.name ?? "");
   const [icon, setIcon] = useState(initial?.icon ?? "");
   const [color, setColor] = useState(initial?.color ?? "bg-red-100");
+  const [saving, setSaving] = useState(false);
 
-  function handleSave() {
+  async function handleSave() {
     if (!name.trim()) return;
-    onSave({ name: name.trim(), icon: icon.trim() || "school", color });
-    onClose();
+    setSaving(true);
+    try {
+      onSave({ name: name.trim(), icon: icon.trim() || "school", color });
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -145,7 +153,8 @@ function SubjectModal({
             type="button"
             data-ocid="subject_modal.cancel_button"
             onClick={onClose}
-            className="px-6 py-2 border-2 border-black rounded-full font-headline font-bold text-sm hover:bg-zinc-100 transition-all"
+            disabled={saving}
+            className="px-6 py-2 border-2 border-black rounded-full font-headline font-bold text-sm hover:bg-zinc-100 transition-all disabled:opacity-50"
           >
             Cancel
           </button>
@@ -153,8 +162,14 @@ function SubjectModal({
             type="button"
             data-ocid="subject_modal.save_button"
             onClick={handleSave}
-            className="px-6 py-2 bg-primary text-white border-2 border-black rounded-full font-headline font-bold text-sm shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+            disabled={saving || !name.trim()}
+            className="px-6 py-2 bg-primary text-white border-2 border-black rounded-full font-headline font-bold text-sm shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 flex items-center gap-2"
           >
+            {saving && (
+              <span className="material-symbols-outlined text-sm animate-spin">
+                progress_activity
+              </span>
+            )}
             {initial ? "Save Changes" : "Add Subject"}
           </button>
         </DialogFooter>
@@ -183,17 +198,23 @@ function ModuleModal({
     initial?.status ?? "Active",
   );
   const [icon, setIcon] = useState(initial?.icon ?? "");
+  const [saving, setSaving] = useState(false);
 
   function handleSave() {
     if (!name.trim()) return;
-    onSave({
-      subjectId,
-      name: name.trim(),
-      description: description.trim(),
-      status,
-      icon: icon.trim() || "book",
-    });
-    onClose();
+    setSaving(true);
+    try {
+      onSave({
+        subjectId,
+        name: name.trim(),
+        description: description.trim(),
+        status,
+        icon: icon.trim() || "book",
+      });
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -271,7 +292,8 @@ function ModuleModal({
             type="button"
             data-ocid="module_modal.cancel_button"
             onClick={onClose}
-            className="px-6 py-2 border-2 border-black rounded-full font-headline font-bold text-sm hover:bg-zinc-100 transition-all"
+            disabled={saving}
+            className="px-6 py-2 border-2 border-black rounded-full font-headline font-bold text-sm hover:bg-zinc-100 transition-all disabled:opacity-50"
           >
             Cancel
           </button>
@@ -279,8 +301,14 @@ function ModuleModal({
             type="button"
             data-ocid="module_modal.save_button"
             onClick={handleSave}
-            className="px-6 py-2 bg-primary text-white border-2 border-black rounded-full font-headline font-bold text-sm shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+            disabled={saving || !name.trim()}
+            className="px-6 py-2 bg-primary text-white border-2 border-black rounded-full font-headline font-bold text-sm shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 flex items-center gap-2"
           >
+            {saving && (
+              <span className="material-symbols-outlined text-sm animate-spin">
+                progress_activity
+              </span>
+            )}
             {initial ? "Save Changes" : "Add Module"}
           </button>
         </DialogFooter>
@@ -333,7 +361,7 @@ function DeleteConfirm({
               onConfirm();
               onClose();
             }}
-            className="px-6 py-2 bg-error text-white border-2 border-black rounded-full font-headline font-bold text-sm shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+            className="px-6 py-2 bg-red-600 text-white border-2 border-black rounded-full font-headline font-bold text-sm shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
           >
             Delete
           </button>
@@ -427,7 +455,7 @@ export default function SubjectModuleManager({
         </button>
       </div>
 
-      {/* Subjects list */}
+      {/* Empty state */}
       {subjects.length === 0 && (
         <div
           data-ocid="subject_manager.subjects.empty_state"
@@ -453,10 +481,10 @@ export default function SubjectModuleManager({
             <div
               key={subject.id}
               data-ocid={`subject_manager.subject.item.${si + 1}`}
-              className="bg-surface-container-lowest border-2 border-black rounded-xl overflow-hidden shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+              className="bg-white border-2 border-black rounded-xl overflow-hidden shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
             >
               {/* Subject header */}
-              <div className="p-5 flex items-center justify-between bg-surface-container-low border-b-2 border-black gap-4">
+              <div className="p-5 flex items-center justify-between bg-[#f3f3f4] border-b-2 border-black gap-4">
                 <div className="flex items-center gap-4 min-w-0">
                   <div
                     className={`w-12 h-12 shrink-0 rounded-xl border-2 border-black flex items-center justify-center ${
@@ -486,6 +514,7 @@ export default function SubjectModuleManager({
                     }
                     className="p-2 rounded-lg border-2 border-transparent hover:bg-white hover:border-black transition-all"
                     title="Edit subject"
+                    aria-label={`Edit ${subject.name}`}
                   >
                     <span className="material-symbols-outlined text-secondary text-sm">
                       edit
@@ -500,8 +529,9 @@ export default function SubjectModuleManager({
                         toast.success(`Subject "${subject.name}" deleted.`);
                       })
                     }
-                    className="p-2 rounded-lg border-2 border-transparent hover:bg-error-container hover:text-error hover:border-black transition-all"
+                    className="p-2 rounded-lg border-2 border-transparent hover:bg-red-50 hover:text-red-600 hover:border-black transition-all"
                     title="Delete subject"
+                    aria-label={`Delete ${subject.name}`}
                   >
                     <span className="material-symbols-outlined text-sm">
                       delete
@@ -513,6 +543,11 @@ export default function SubjectModuleManager({
                     onClick={() => toggleExpand(subject.id)}
                     className="p-2 rounded-lg border-2 border-black bg-white hover:bg-zinc-50 transition-all"
                     title={isExpanded ? "Collapse" : "Expand"}
+                    aria-label={
+                      isExpanded
+                        ? `Collapse ${subject.name}`
+                        : `Expand ${subject.name}`
+                    }
                   >
                     <span
                       className="material-symbols-outlined text-sm transition-transform duration-200"
@@ -541,9 +576,9 @@ export default function SubjectModuleManager({
                       data-ocid={`subject_manager.module.item.${mi + 1}`}
                       className="flex items-start gap-3 p-4 bg-white border-2 border-black rounded-xl group hover:border-primary transition-colors"
                     >
-                      <div className="w-10 h-10 shrink-0 rounded-lg border-2 border-black bg-surface-container-low flex items-center justify-center">
+                      <div className="w-10 h-10 shrink-0 rounded-lg border-2 border-black bg-[#f3f3f4] flex items-center justify-center">
                         <span className="material-symbols-outlined text-base">
-                          {mod.icon}
+                          {mod.icon ?? "book"}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -576,6 +611,7 @@ export default function SubjectModuleManager({
                           }
                           className="p-1.5 rounded-lg hover:bg-zinc-100 hover:text-primary transition-colors"
                           title="Edit module"
+                          aria-label={`Edit ${mod.name}`}
                         >
                           <span className="material-symbols-outlined text-sm">
                             edit
@@ -590,8 +626,9 @@ export default function SubjectModuleManager({
                               toast.success(`Module "${mod.name}" deleted.`);
                             })
                           }
-                          className="p-1.5 rounded-lg hover:bg-red-50 hover:text-error transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
                           title="Delete module"
+                          aria-label={`Delete ${mod.name}`}
                         >
                           <span className="material-symbols-outlined text-sm">
                             delete

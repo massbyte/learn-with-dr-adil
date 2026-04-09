@@ -414,7 +414,7 @@ export default function MCQPage({
         {/* Question Card */}
         <section
           data-ocid="mcq.question.card"
-          className="bg-surface-container-lowest border-2 border-black rounded-xl p-6 mb-6 neo-brutal-shadow"
+          className="bg-white border-2 border-black rounded-xl p-6 mb-6 neo-brutal-shadow"
         >
           <div className="mb-6">
             <p className="text-lg font-medium leading-relaxed">
@@ -437,7 +437,7 @@ export default function MCQPage({
                       key={`opt-${q.id}-${oi}`}
                       data-ocid={`mcq.option.${oi + 1}`}
                       disabled
-                      className="w-full text-left p-4 rounded-xl border-2 border-black bg-tertiary text-white neo-brutal-shadow-sm flex justify-between items-center cursor-default"
+                      className="w-full text-left p-4 rounded-xl border-2 border-black bg-green-600 text-white neo-brutal-shadow-sm flex justify-between items-center cursor-default"
                     >
                       <div className="flex items-center">
                         <span className="font-headline font-bold mr-4">
@@ -461,7 +461,7 @@ export default function MCQPage({
                       key={`opt-${q.id}-${oi}`}
                       data-ocid={`mcq.option.${oi + 1}`}
                       disabled
-                      className="w-full text-left p-4 rounded-xl border-2 border-black bg-error text-white neo-brutal-shadow-sm flex justify-between items-center cursor-default"
+                      className="w-full text-left p-4 rounded-xl border-2 border-black bg-red-600 text-white neo-brutal-shadow-sm flex justify-between items-center cursor-default"
                     >
                       <div className="flex items-center">
                         <span className="font-headline font-bold mr-4">
@@ -500,7 +500,7 @@ export default function MCQPage({
                   key={`opt-${q.id}-${oi}`}
                   data-ocid={`mcq.option.${oi + 1}`}
                   onClick={() => selectAnswer(oi)}
-                  className="w-full text-left p-4 rounded-xl border-2 border-black bg-white hover:bg-surface-container-low transition-all group flex justify-between items-center"
+                  className="w-full text-left p-4 rounded-xl border-2 border-black bg-white hover:bg-[#f3f3f4] active:bg-[#ebebeb] transition-all group flex justify-between items-center"
                 >
                   <span className="font-headline font-bold mr-4 opacity-50">
                     {getOptionLabel(oi)}
@@ -515,44 +515,81 @@ export default function MCQPage({
           </div>
         </section>
 
-        {/* Explanation Section — only after answer */}
-        {session.showAnswer && q.explanation && (
-          <section className="bg-surface-container border-2 border-black rounded-xl overflow-hidden mb-6">
-            <div className="bg-black text-white px-6 py-2 flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">
-                lightbulb
+        {/* Unified Answer Feedback Box — shown after answer is selected */}
+        {session.showAnswer && (
+          <section
+            data-ocid="mcq.answer_feedback.box"
+            className="border-2 border-black rounded-xl overflow-hidden mb-6 neo-brutal-shadow"
+          >
+            {/* Correct Answer Label */}
+            <div className="bg-green-600 text-white px-5 py-3 flex items-center gap-2">
+              <span
+                className="material-symbols-outlined text-base"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                check_circle
               </span>
-              <span className="font-headline font-bold text-xs uppercase tracking-widest">
-                Expert Explanation
+              <span className="font-headline font-bold text-sm uppercase tracking-widest">
+                Correct Answer
               </span>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="flex items-start gap-4">
-                <img
-                  alt="Dr. Adil portrait"
-                  src="/assets/generated/dr-adil-avatar.dim_200x200.jpg"
-                  className="w-12 h-12 rounded-full border-2 border-black object-cover shrink-0"
-                />
-                <div>
-                  <p className="font-bold text-black mb-1">Dr. Adil's Note:</p>
-                  <p className="text-sm leading-relaxed text-secondary">
-                    {bullets.length > 0 ? explanationIntro : q.explanation}
-                  </p>
+            <div className="bg-white px-5 py-4 border-b-2 border-black">
+              <p className="font-headline font-extrabold text-base text-black">
+                {getOptionLabel(correctAnswer)}. {q.options[correctAnswer]}
+              </p>
+              {userAnswer !== null && userAnswer !== correctAnswer && (
+                <p className="mt-1 text-sm font-label text-[#af101a] flex items-center gap-1">
+                  <span
+                    className="material-symbols-outlined text-sm"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    cancel
+                  </span>
+                  Your answer:{" "}
+                  <span className="font-bold">
+                    {getOptionLabel(userAnswer)}. {q.options[userAnswer]}
+                  </span>
+                </p>
+              )}
+              {userAnswer !== null && userAnswer === correctAnswer && (
+                <p className="mt-1 text-sm font-label text-green-700 flex items-center gap-1">
+                  <span
+                    className="material-symbols-outlined text-sm"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    check_circle
+                  </span>
+                  <span className="font-bold">You answered correctly!</span>
+                </p>
+              )}
+            </div>
+
+            {/* Explanation */}
+            {q.explanation && (
+              <div className="bg-[#f9f9fb] px-5 py-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span
+                    className="material-symbols-outlined text-base text-[#5e5e5e]"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    lightbulb
+                  </span>
+                  <span className="font-headline font-bold text-xs uppercase tracking-widest text-[#5e5e5e]">
+                    Explanation
+                  </span>
                 </div>
-              </div>
-              {bullets.length > 0 && (
-                <div className="bg-surface-container-lowest p-4 rounded-lg border border-black/10">
-                  <h4 className="font-headline font-bold text-sm mb-2 text-primary">
-                    Key Learning Point:
-                  </h4>
-                  <ul className="text-sm space-y-2 list-disc pl-4 text-on-surface">
+                <p className="text-sm leading-relaxed text-[#3d3d3d]">
+                  {bullets.length > 0 ? explanationIntro : q.explanation}
+                </p>
+                {bullets.length > 0 && (
+                  <ul className="mt-3 text-sm space-y-1.5 list-disc pl-5 text-[#3d3d3d]">
                     {bullets.map((bullet) => (
                       <li key={bullet}>{bullet}</li>
                     ))}
                   </ul>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </section>
         )}
 
@@ -562,7 +599,7 @@ export default function MCQPage({
             type="button"
             data-ocid="mcq.flag.button"
             onClick={() => toast("Question flagged for review.")}
-            className="flex-1 bg-white border-2 border-black text-black py-4 rounded-full font-headline font-extrabold uppercase tracking-widest text-sm transition-all hover:bg-surface-container-low active:translate-x-0.5 active:translate-y-0.5"
+            className="flex-1 bg-white border-2 border-black text-black py-4 rounded-full font-headline font-extrabold uppercase tracking-widest text-sm transition-all hover:bg-[#f3f3f4] active:translate-x-0.5 active:translate-y-0.5"
           >
             Flag Question
           </button>
